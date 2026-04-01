@@ -53,7 +53,7 @@ int main()
 {
   int window_width = 800;
   int window_height = 800;
- 
+
   SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
   InitWindow(window_width, window_height, "game of life - cuda opengl interop");
   SetTargetFPS(60);
