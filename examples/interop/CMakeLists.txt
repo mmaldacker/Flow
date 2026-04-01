@@ -1,0 +1,2 @@
+add_executable(gl_interop_example gl_interop.cu)
+target_link_libraries(gl_interop_example flow)
