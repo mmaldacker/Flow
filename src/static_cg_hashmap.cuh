@@ -9,6 +9,8 @@ template <unsigned groupSize = 1>
 class GroupLinearProbing
 {
 public:
+  static constexpr unsigned kGroupSize = groupSize;
+
   __device__ GroupLinearProbing(std::uint64_t keyIndex,
                                 const cg::thread_block_tile<groupSize>& group,
                                 std::uint64_t tableSize)
@@ -36,7 +38,11 @@ private:
 
 __global__ void clear_group_kernel(tcb::span<std::uint64_t> table)
 {
-  table[get_tid()] = ~0;
+  const auto index = get_tid();
+  if (index < table.size())
+  {
+    table[index] = ~0;
+  }
 };
 
 template <typename DeviceStaticHash, typename ValueType, unsigned groupSize>
@@ -44,28 +50,27 @@ __global__ void insert_group_kernel(tcb::span<std::uint64_t> keys,
                                     tcb::span<ValueType> values,
                                     DeviceStaticHash table)
 {
-  auto index = get_tid();
-  const auto gid = index / groupSize;
-
-  if (gid >= keys.size())
+  auto index = get_tid() / groupSize;
+  if (index >= keys.size())
     return;
 
-  auto key = keys[gid];
-  auto& value = values[gid];
+  auto key = keys[index];
+  auto& value = values[index];
 
   table.insert(key, value);
 };
 
-template <typename Hash, typename Probing, unsigned groupSize, typename ValueType>
+template <typename Hash, typename Probing, typename ValueType>
 class GroupDeviceStaticHash;
 
-template <typename Hash, typename Probing, unsigned groupSize, typename ValueType>
+template <typename Hash, typename Probing, typename ValueType>
 class GroupStaticHash
 {
 public:
   static const std::uint64_t kEmpty = ~0;
+  static constexpr unsigned kGroupSize = Probing::kGroupSize;
 
-  using DeviceStaticHash = GroupDeviceStaticHash<Hash, Probing, groupSize, ValueType>;
+  using DeviceStaticHash = GroupDeviceStaticHash<Hash, Probing, ValueType>;
 
   GroupStaticHash(const cuda::stream_t& stream, std::uint64_t size, float load_factor)
       : stream_(stream)
@@ -98,10 +103,10 @@ public:
     auto device_hash = device_table();
 
     auto launch_config = cuda::launch_config_builder()
-                             .overall_dimensions(device_keys.size() * groupSize)
+                             .overall_dimensions(device_keys.size() * kGroupSize)
                              .block_size(256)
                              .build();
-    stream_.enqueue.kernel_launch(insert_group_kernel<DeviceStaticHash, ValueType, groupSize>,
+    stream_.enqueue.kernel_launch(insert_group_kernel<DeviceStaticHash, ValueType, kGroupSize>,
                  launch_config,
                  keys,
                  values,
@@ -124,26 +129,26 @@ private:
   cuda::unique_span<ValueType> table_values_;
 };
 
-template <typename Hash, typename Probing, unsigned groupSize, typename ValueType>
+template <typename Hash, typename Probing, typename ValueType>
 class GroupDeviceStaticHash
 {
 public:
+  static constexpr unsigned kGroupSize = Probing::kGroupSize;
+
   GroupDeviceStaticHash(cuda::unique_span<std::uint64_t>& table,
                         cuda::unique_span<ValueType>& table_values)
       : table_(to_span(table)), table_values_(to_span(table_values))
   {
   }
 
-  using StaticHash = GroupStaticHash<Hash, Probing, groupSize, ValueType>;
+  using StaticHash = GroupStaticHash<Hash, Probing, ValueType>;
 
   __device__ void insert(std::uint64_t key, ValueType& value)
   {
-    const cg::thread_block_tile<groupSize> group =
-        cg::tiled_partition<groupSize>(cg::this_thread_block());
+    const cg::thread_block_tile<kGroupSize> group =
+        cg::tiled_partition<kGroupSize>(cg::this_thread_block());
 
-    auto keyHash = Hash::hash(key);
-
-    Probing b(keyHash, group, table_.size());
+    Probing b(Hash::hash(key), group, table_.size());
     for (; b.isValid(); b.next())
     {
       auto i = b.index();
@@ -183,12 +188,10 @@ public:
 
   __device__ bool has_key(std::uint64_t key)
   {
-    const cg::thread_block_tile<groupSize> group =
-        cg::tiled_partition<groupSize>(cg::this_thread_block());
+    const cg::thread_block_tile<kGroupSize> group =
+        cg::tiled_partition<kGroupSize>(cg::this_thread_block());
 
-    auto keyHash = Hash::hash(key);
-
-    Probing b(keyHash, group, table_.size());
+    Probing b(Hash::hash(key), group, table_.size());
     for (; b.isValid(); b.next())
     {
       auto& k = table_[b.index()];
@@ -205,12 +208,10 @@ public:
 
   __device__ ValueType* get_value(std::uint64_t key)
   {
-    const cg::thread_block_tile<groupSize> group =
-        cg::tiled_partition<groupSize>(cg::this_thread_block());
+    const cg::thread_block_tile<kGroupSize> group =
+        cg::tiled_partition<kGroupSize>(cg::this_thread_block());
 
-    auto keyHash = Hash::hash(key);
-
-    Probing b(keyHash, group, table_.size());
+    Probing b(Hash::hash(key), group, table_.size());
     for (; b.isValid(); b.next())
     {
       auto& k = table_[b.index()];

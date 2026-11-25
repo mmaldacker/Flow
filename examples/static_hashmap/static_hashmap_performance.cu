@@ -67,7 +67,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, 1, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, std::uint64_t>>(
             load);
     std::cout << "grouplinear1," << load << "," << elapsed << std::endl;
   }
@@ -75,7 +75,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<2>, 2, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<2>, std::uint64_t>>(
             load);
     std::cout << "grouplinear2," << load << "," << elapsed << std::endl;
   }
@@ -83,7 +83,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, 4, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, std::uint64_t>>(
             load);
     std::cout << "grouplinear4," << load << "," << elapsed << std::endl;
   }
@@ -91,7 +91,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<8>, 8, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<8>, std::uint64_t>>(
             load);
     std::cout << "grouplinear8," << load << "," << elapsed << std::endl;
   }
@@ -99,7 +99,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<16>, 16, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<16>, std::uint64_t>>(
             load);
     std::cout << "grouplinear16," << load << "," << elapsed << std::endl;
   }
@@ -107,7 +107,7 @@ int main()
   for (auto load : loads)
   {
     auto elapsed =
-        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<32>, 32, std::uint64_t>>(
+        test_insert_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<32>, std::uint64_t>>(
             load);
     std::cout << "grouplinear32," << load << "," << elapsed << std::endl;
   }

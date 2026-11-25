@@ -48,7 +48,11 @@ private:
 
 __global__ void clear_kernel(tcb::span<std::uint64_t> table)
 {
-  table[get_tid()] = ~0;
+  const auto index = get_tid();
+  if (index < table.size())
+  {
+    table[index] = ~0;
+  }
 };
 
 template <typename DeviceStaticHash, typename ValueType>
@@ -168,7 +172,7 @@ public:
 
   __device__ bool has_key(std::uint64_t key)
   {
-    Probing b(key, table_.size());
+    Probing b(Hash::hash(key), table_.size());
     for (; b.isValid(); b.next())
     {
       auto& k = table_[b.index()];
@@ -183,7 +187,7 @@ public:
 
   __device__ ValueType* get_value(std::uint64_t key)
   {
-    Probing b(key, table_.size());
+    Probing b(Hash::hash(key), table_.size());
     for (; b.isValid(); b.next())
     {
       auto i = b.index();

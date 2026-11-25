@@ -77,9 +77,9 @@ void verify_group_hashmap()
   auto stream = device.default_stream();
 
   StaticHash<MurmurHash64A, LinearProbing, std::uint64_t> hash1(stream, table_size, 0.8);
-  GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, 1, std::uint64_t> hash2(
+  GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, std::uint64_t> hash2(
       stream, table_size, 0.8);
-  GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, 4, std::uint64_t> hash3(
+  GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, std::uint64_t> hash3(
       stream, table_size, 0.8);
 
   std::vector<std::uint64_t> keys(table_size);
@@ -122,13 +122,13 @@ int main()
     //verify_hashmap<StaticHash<MurmurHash64A, QuadraticProbing, std::uint64_t>, 1>();
 
     std::cout << "Verify group static hash size 1" << std::endl;
-    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, 1, std::uint64_t>, 1>();
+    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<1>, std::uint64_t>, 1>();
 
     std::cout << "Verify group static hash size 2" << std::endl;
-    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<2>, 2, std::uint64_t>, 2>();
+    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<2>, std::uint64_t>, 2>();
 
     std::cout << "Verify group static hash size 4" << std::endl;
-    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, 4, std::uint64_t>, 4>();
+    verify_hashmap<GroupStaticHash<MurmurHash64A, GroupLinearProbing<4>, std::uint64_t>, 4>();
 
     std::cout << "Verify group static hash vs linear" << std::endl;
 

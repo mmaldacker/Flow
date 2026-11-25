@@ -1,4 +1,10 @@
-add_executable(static_hashmap_example static_hashmap_test.cu)
+add_executable(static_hashmap_test static_hashmap_test.cu)
+target_compile_options(static_hashmap_test PRIVATE
+        $<$<COMPILE_LANGUAGE:CUDA>:${CUDA_FLAGS}>
+)
+target_link_libraries(static_hashmap_test flow)
+
+add_executable(static_hashmap_example static_hashmap_example.cu)
 target_compile_options(static_hashmap_example PRIVATE
         $<$<COMPILE_LANGUAGE:CUDA>:${CUDA_FLAGS}>
 )
