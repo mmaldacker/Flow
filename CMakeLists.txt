@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.22)
 project(flow CXX CUDA)
 include(FetchContent)
 
+set(CMAKE_CXX_STANDARD 20)
+
 FetchContent_Declare(cuda-api-wrappers_library
         GIT_REPOSITORY https://github.com/eyalroz/cuda-api-wrappers.git
         GIT_TAG v0.8.1)
